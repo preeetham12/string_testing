@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NUERiQ String Testing · Results</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .dash-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .stat b { display: block; font-size: 28px; }
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-bottom: 10px; }
+  .filters label { margin: 0 0 4px; }
+  .filters input, .filters select { min-width: 200px; }
+  #resultsTable tbody tr { cursor: pointer; }
+  #resultsTable tbody tr:hover { background: #1b2724; }
+  #resultsTable tr.new td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .pill.ok { background: #143525; color: #7fe0a8; } .pill.warn { background: #3a2c10; color: #f6c86a; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  #detail audio { width: 100%; margin: 8px 0 12px; }
+  .detail-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: start; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo" aria-hidden="true">♪</div>
+    <div class="brand"><h1>NUERiQ String Testing · Results</h1><div class="who" id="status" role="status" aria-live="polite"></div></div>
+    <div class="top-actions"><a class="btn small" href="./">Open the testing page</a></div>
+  </header>
+
+  <main>
+  <section id="login" class="card narrow" aria-labelledby="hLogin">
+    <h2 id="hLogin">Dashboard key</h2>
+    <p class="muted">Results are private. Enter the dashboard key (ask whoever runs the server; it is in <code>tester_dashboard_key.txt</code> in the data folder, or the <code>TESTER_DASHBOARD_KEY</code> setting).</p>
+    <form id="loginForm">
+      <label for="key">Key</label>
+      <input id="key" type="password" autocomplete="current-password" required>
+      <div id="loginErr" class="err" role="alert" hidden></div>
+      <button class="btn primary big" type="submit">Open the results</button>
+    </form>
+  </section>
+
+  <section id="board" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="card">
+      <div class="dash-top">
+        <h2>Completed tests</h2>
+        <div><a class="btn small" id="csv" href="#">Export all (CSV / Excel)</a> <button class="btn small" id="refresh" type="button">Refresh</button></div>
+      </div>
+      <div class="filters">
+        <div><label for="q">Search tester</label><input id="q" type="search" placeholder="Name"></div>
+        <div><label for="inst">Instrument</label><select id="inst"><option value="">All</option></select></div>
+      </div>
+      <p class="muted small">New tests appear automatically (checked every 15 seconds). Click a row to open the full report.</p>
+      <div class="table-wrap"><table id="resultsTable">
+        <thead><tr><th>Date</th><th>Tester</th><th>Instrument</th><th class="num">Notes</th><th class="num">Heard correctly</th><th class="num">Within ±15 cents</th><th class="num">Length</th><th>Recording</th></tr></thead>
+        <tbody></tbody></table></div>
+    </div>
+    <section id="detail" class="card" hidden aria-live="polite"></section>
+  </section>
+  </main>
+</div>
+<script src="dashboard.js"></script>
+</body>
+</html>

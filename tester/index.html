@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NUERiQ String Testing</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2340c0c8'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='%23102'%3E%E2%99%AA%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo" aria-hidden="true">♪</div>
+    <div class="brand">
+      <h1>NUERiQ String Testing</h1>
+      <div id="who" class="who" hidden></div>
+      <div id="net" class="who" role="status" aria-live="polite"></div>
+    </div>
+    <div class="top-actions" id="topActions" hidden>
+      <button class="btn small" id="btnProblem" type="button">Report a problem</button>
+      <button class="btn small" id="btnNotYou" type="button">Not you?</button>
+    </div>
+  </header>
+
+  <ol class="steps" id="steps" aria-label="Progress">
+    <li data-step="1"><span class="dot">1</span>Your details</li>
+    <li data-step="2"><span class="dot">2</span>Room check and recording</li>
+    <li data-step="3"><span class="dot">3</span>Listen</li>
+    <li data-step="4"><span class="dot">4</span>Check the form</li>
+    <li data-step="5"><span class="dot">5</span>Done</li>
+  </ol>
+
+  <!-- 1 ---------------------------------------------------------------- -->
+  <main>
+  <section id="s1" class="card narrow" aria-labelledby="h1">
+    <h2 id="h1">Who is testing?</h2>
+    <p class="muted">Fill this in once. We use it only to know who made each test.</p>
+    <form id="detailsForm" novalidate>
+      <label for="fName">Your name</label>
+      <input id="fName" autocomplete="name" required>
+      <label for="fEmail">Your e-mail</label>
+      <input id="fEmail" type="email" autocomplete="email" required>
+      <label for="fInst">Instrument</label>
+      <select id="fInst">
+        <option value="auto">Not sure — find out for me</option>
+        <option value="violin">Violin</option>
+        <option value="viola">Viola</option>
+        <option value="cello">Cello</option>
+        <option value="guitar">Guitar</option>
+        <option value="veena">Veena</option>
+        <option value="sitar">Sitar</option>
+        <option value="ukulele">Ukulele</option>
+        <option value="mandolin">Mandolin</option>
+        <option value="other">Other string instrument</option>
+      </select>
+      <details>
+        <summary>About this test (optional, helps us find problems)</summary>
+        <label for="fPiece">What will you play?</label>
+        <input id="fPiece" placeholder="e.g. scale, a song, free playing">
+        <label for="fDevice">Device and microphone</label>
+        <input id="fDevice" placeholder="e.g. phone built-in mic, laptop, USB mic">
+        <label for="fRoom">Room</label>
+        <input id="fRoom" placeholder="e.g. quiet bedroom, hall with echo, fan on">
+      </details>
+      <label class="check"><input type="checkbox" id="fConsent">
+        <span>I agree that my test recordings, the notes I play, my changes to the form and my name are stored privately (my e-mail stays on this device and is not sent) and used only to test and improve NUERiQ. I can ask for my recordings to be deleted.</span></label>
+      <div id="detailsErr" class="err" role="alert" hidden></div>
+      <button class="btn primary big" id="btnStart" type="submit">Start testing</button>
+    </form>
+  </section>
+
+  <!-- 2 ---------------------------------------------------------------- -->
+  <section id="s2" class="card" hidden aria-labelledby="h2">
+    <div id="ready" class="center">
+      <h2 id="h2">Ready to record</h2>
+      <p class="muted">Press <b>Record</b>. First we listen to the room for 3 seconds — <b>please stay quiet</b>. Then you play.</p>
+      <p class="muted small">Put the phone or microphone about an arm's length from the instrument. Play 10 seconds or more, clearly, with no talking.</p>
+      <button class="rec-btn" id="btnRec" type="button"><span class="rec-dot"></span>Record</button>
+      <div id="micErr" class="err" role="alert" hidden></div>
+    </div>
+    <div id="roomcheck" class="center" hidden>
+      <h2>Listening to the room…</h2>
+      <p class="muted">Please stay quiet.</p>
+      <div class="count" id="roomCount">3</div>
+      <div class="meter"><div id="roomBar"></div></div>
+    </div>
+    <div id="live" hidden>
+      <div class="rec-head"><span class="rec-state"><i></i>Recording</span><span class="rec-right"><span id="timer" class="timer" aria-live="off">0:00</span><button class="btn stop" id="btnStop" type="button">■ Stop</button></span></div>
+      <div id="levels" class="levels" aria-hidden="true"></div>
+      <div class="now-row">
+        <div id="nowNote" class="now-note">—</div>
+        <div id="nowWest" class="now-west"></div>
+        <div id="nowCents" class="now-cents"></div>
+      </div>
+      <div id="liveTalk" class="live-hint" role="status" hidden>Talking or other noise heard. It is ignored, but please stay quiet between notes.</div>
+      <div class="graph-wrap"><canvas id="graph" height="220" role="img" aria-label="Live pitch graph"></canvas>
+        <div class="graph-legend"><span>Last 8 seconds · each bar is a note it heard (S1 = string 1) · line = pitch</span><span id="liveCount"></span></div></div>
+    </div>
+    <div id="busy" class="center" hidden><h2>Checking your recording…</h2><p class="muted">A careful second pass over every note. This takes a few seconds.</p><div class="spin"></div></div>
+  </section>
+
+  <!-- 3 ---------------------------------------------------------------- -->
+  <section id="s3" class="card" hidden aria-labelledby="h3">
+    <h2 id="h3" class="center">Recording finished</h2>
+    <p class="center" id="s3sum"></p>
+    <audio id="aud3" controls preload="auto"></audio>
+    <div id="s3flags"></div>
+    <div class="row-btns">
+      <button class="btn" id="btnAgain" type="button">Record again</button>
+      <button class="btn primary" id="btnUse" type="button">Use this recording →</button>
+    </div>
+  </section>
+
+  <!-- 4 ---------------------------------------------------------------- -->
+  <section id="s4" hidden aria-labelledby="h4">
+    <div class="card accent">
+      <h2 id="h4">Check the form</h2>
+      <p>Play the recording and look at the keys. <b>Is every key you played shown correctly?</b> If something is wrong, change it in the <b>Keys</b> table (or add / delete a key). After each change we ask <b>why</b> — one tap.</p>
+      <p class="muted small">When everything is right, press <b>Submit test</b> at the bottom.</p>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>The form</h3><span class="badge ok">Worked out on this device</span></div>
+      <audio id="aud4" controls preload="auto"></audio>
+      <div class="controls">
+        <label>Speed <select id="speed"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option></select></label>
+        <label>Loop <select id="loop"><option value="off">Off</option><option value="key">Selected key</option></select></label>
+        <label class="radio"><input type="radio" name="mode" value="live" checked> As shown live</label>
+        <label class="radio"><input type="radio" name="mode" value="checked"> Checked keys</label>
+      </div>
+      <div class="graph-wrap"><canvas id="graph4" height="240" role="img" aria-label="Pitch graph of the whole recording. Click to jump."></canvas>
+        <div class="graph-legend"><span>Click the graph to jump · orange bar = playing now</span><span id="modeNote"></span></div></div>
+      <div id="now4" class="now-row small"><div id="now4Note" class="now-note">—</div><div id="now4West" class="now-west"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Keys</h3><button class="btn small" id="btnAddKey" type="button">+ Add a key at the playhead</button></div>
+      <div class="table-wrap"><table id="keysTable">
+        <thead><tr><th>#</th><th>Time</th><th>String</th><th>Note</th><th>Tuning</th><th>Length</th><th><span class="sr">Actions</span></th></tr></thead>
+        <tbody></tbody></table></div>
+      <div id="why" class="why" hidden role="group" aria-label="Why did you change this?"></div>
+    </div>
+    <div class="card">
+      <h3>Instrument</h3>
+      <p id="instLine"></p>
+      <label for="instFinal">The instrument I really played</label>
+      <select id="instFinal"></select>
+      <div id="instWhy" class="why" hidden></div>
+      <details><summary>How the app decided</summary><ul id="instEvidence" class="evidence"></ul></details>
+    </div>
+    <div class="card">
+      <label for="finalNote">Anything else we should know? (optional)</label>
+      <textarea id="finalNote" rows="3"></textarea>
+      <div class="row-btns"><button class="btn primary big" id="btnSubmit" type="button">Submit test</button></div>
+    </div>
+  </section>
+
+  <!-- 5 ---------------------------------------------------------------- -->
+  <section id="s5" hidden aria-labelledby="h5">
+    <div class="card"><h2 id="h5" class="center">Test report</h2><div id="report"></div></div>
+    <div class="row-btns noprint">
+      <button class="btn" id="btnJson" type="button">Download report (JSON)</button>
+      <button class="btn" id="btnWav" type="button">Download recording (WAV)</button>
+      <button class="btn" id="btnPrint" type="button">Print / save as PDF</button>
+      <button class="btn primary" id="btnNew" type="button">Test again</button>
+    </div>
+  </section>
+  </main>
+</div>
+
+<dialog id="dlgProblem"><form method="dialog">
+  <h3>Report a problem</h3>
+  <label for="problemText">What went wrong?</label>
+  <textarea id="problemText" rows="4"></textarea>
+  <div class="row-btns"><button class="btn" value="cancel">Cancel</button><button class="btn primary" value="ok">Save</button></div>
+</form></dialog>
+
+<script src="dsp.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

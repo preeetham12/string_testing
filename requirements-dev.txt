@@ -1,0 +1,6 @@
+# Testing: everything in requirements.txt plus the test tools.
+-r requirements.txt
+pytest==9.1.1
+playwright==1.56.0
+# Browser tests also need:  python -m playwright install chromium
+# and the accessibility checker:  npm install --prefix /tmp/axe axe-core@4

@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StringCoach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="#/home" class="brand">StringCoach</a>
+    <span id="who" class="who"></span>
+    <button id="logout" class="link" hidden>Log out</button>
+  </header>
+
+  <main id="view" tabindex="-1"></main>
+
+  <!-- status messages are read out by screen readers -->
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+
+  <template id="t-login">
+    <section class="narrow">
+      <h1>Practise with your teacher's recording</h1>
+      <form id="login-form" novalidate>
+        <h2>Log in</h2>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="username" required>
+        <p class="error-msg">Enter an email address like name@school.in</p>
+        <label for="current-password">Password</label>
+        <input id="current-password" name="password" type="password" autocomplete="current-password"
+               minlength="8" required>
+        <p class="error-msg">Passwords are at least 8 characters</p>
+        <button type="submit" class="primary">Log in</button>
+      </form>
+      <details>
+        <summary>New here? Create an account</summary>
+        <form id="register-form" novalidate>
+          <label for="name">Your name</label>
+          <input id="name" name="name" autocomplete="name" required>
+          <p class="error-msg">Enter your name</p>
+          <label for="reg-email">Email</label>
+          <input id="reg-email" name="email" type="email" autocomplete="username" required>
+          <p class="error-msg">Enter an email address like name@school.in</p>
+          <label for="new-password">Password</label>
+          <input id="new-password" name="password" type="password" autocomplete="new-password"
+                 minlength="8" required aria-describedby="pw-hint">
+          <p id="pw-hint" class="hint">At least 8 characters</p>
+          <fieldset>
+            <legend>I am a</legend>
+            <label class="inline"><input type="radio" name="role" value="student" checked> Student</label>
+            <label class="inline"><input type="radio" name="role" value="teacher"> Teacher</label>
+          </fieldset>
+          <button type="submit" class="primary">Create account</button>
+        </form>
+      </details>
+    </section>
+  </template>
+
+  <template id="t-home">
+    <section class="narrow">
+      <h1>Your lessons</h1>
+      <div id="classes"></div>
+    </section>
+  </template>
+
+  <template id="t-assignment">
+    <section class="practice">
+      <div class="practice-head">
+        <h1 id="a-title"></h1>
+        <p id="a-attempts" class="attempts"></p>
+      </div>
+
+      <div class="controls">
+        <div class="listen">
+          <button id="listen" class="secondary" aria-pressed="false">Listen to teacher</button>
+          <label for="speed" class="inline">Speed</label>
+          <select id="speed">
+            <option value="1">Normal</option>
+            <option value="0.75">Slower</option>
+            <option value="0.5">Half speed</option>
+          </select>
+          <audio id="ref-audio" preload="auto"></audio>
+        </div>
+        <div class="sections" role="radiogroup" aria-label="What to practise" id="sections"></div>
+      </div>
+
+      <div class="lane-wrap">
+        <canvas id="lane" aria-label="Live pitch: the teacher's notes are blue steps, your pitch is the amber line"></canvas>
+        <p class="lane-key"><span class="k-teacher"></span>Teacher <span class="k-you"></span>You</p>
+      </div>
+
+      <div class="tuner" aria-live="off">
+        <div id="note-name" class="note-name">–</div>
+        <div class="needle-track" aria-hidden="true">
+          <span class="mark flat">flat</span><span class="mark center"></span><span class="mark sharp">sharp</span>
+          <div id="needle" class="needle"></div>
+        </div>
+        <div id="cents" class="cents">&nbsp;</div>
+      </div>
+
+      <div class="actions">
+        <button id="mic-check" class="secondary">Check microphone</button>
+        <button id="record" class="record" disabled>Record</button>
+        <p class="hint">Press <kbd>Space</kbd> to start and stop, so your hands can stay on the instrument.</p>
+        <p class="hint">For the most accurate review, keep your phone or laptop within about 1 metre of your instrument, in a quiet room.</p>
+      </div>
+
+      <div id="upload" class="upload" hidden>
+        <label for="upload-progress">Sending your recording</label>
+        <progress id="upload-progress" max="100" value="0"></progress>
+      </div>
+
+      <section id="report" class="report" hidden aria-labelledby="report-title"></section>
+
+      <section class="history">
+        <h2>Your takes</h2>
+        <ol id="takes" class="takes"></ol>
+      </section>
+    </section>
+  </template>
+
+  <!-- ================= Part 7: teacher studio ================= -->
+  <template id="t-teacher-home">
+    <section>
+      <h1>Your classes</h1>
+      <div id="t-classes"></div>
+      <form id="new-class" class="card inline-form">
+        <h2>New class</h2>
+        <label for="class-name">Class name</label>
+        <input id="class-name" name="name" required placeholder="Violin Grade 2">
+        <label for="class-instrument">Instrument</label>
+        <select id="class-instrument" name="instrument">
+          <option value="violin">Violin</option><option value="viola">Viola</option>
+          <option value="cello">Cello</option><option value="guitar">Guitar</option>
+        </select>
+        <button type="submit" class="primary">Create class</button>
+      </form>
+    </section>
+  </template>
+
+  <template id="t-new-lesson">
+    <section class="narrow">
+      <p><a href="#/home">&larr; Your classes</a></p>
+      <h1>New lesson</h1>
+      <p id="nl-class" class="hint"></p>
+      <form id="lesson-form" novalidate>
+        <label for="nl-title">Title</label>
+        <input id="nl-title" name="title" required placeholder="Twinkle, first 4 phrases">
+        <p class="error-msg">Give the lesson a title</p>
+        <label for="nl-level">Student level</label>
+        <select id="nl-level" name="level">
+          <option value="beginner">Beginner (most forgiving)</option>
+          <option value="intermediate" selected>Intermediate</option>
+          <option value="advanced">Advanced (strictest)</option>
+        </select>
+        <label for="nl-pass">Pass mark for each section</label>
+        <input id="nl-pass" name="pass_mark" type="number" min="50" max="100" value="90" required>
+        <label for="nl-max">Full takes each student may submit</label>
+        <input id="nl-max" name="max_attempts" type="number" min="1" max="100" value="10" required>
+        <fieldset>
+          <legend>Your reference recording</legend>
+          <label class="inline"><input type="radio" name="source" value="file" checked> Upload a WAV file</label>
+          <label class="inline"><input type="radio" name="source" value="record"> Record it here</label>
+        </fieldset>
+        <div id="src-file">
+          <label for="nl-file">WAV file</label>
+          <input id="nl-file" name="file" type="file" accept=".wav,audio/wav,audio/x-wav">
+        </div>
+        <div id="src-record" hidden>
+          <p class="hint">Play the whole piece once, the way you want students to play it.</p>
+          <div class="tuner small"><div id="note-name" class="note-name">–</div>
+            <div class="needle-track" aria-hidden="true"><span class="mark flat">flat</span><span class="mark center"></span><span class="mark sharp">sharp</span><div id="needle" class="needle"></div></div>
+            <div id="cents" class="cents">&nbsp;</div></div>
+          <figure class="lane-wrap">
+            <canvas id="lane" aria-label="Live pitch graph of your playing"></canvas>
+            <figcaption class="lane-key"><span class="k-you"></span>Your playing</figcaption>
+          </figure>
+          <button type="button" id="nl-record" class="record">Record</button>
+          <p id="nl-recorded" class="hint"></p>
+        </div>
+        <div id="upload" class="upload" hidden>
+          <label for="upload-progress">Sending your recording</label>
+          <progress id="upload-progress" max="100" value="0"></progress>
+        </div>
+        <button type="submit" class="primary">Create lesson</button>
+      </form>
+    </section>
+  </template>
+
+  <template id="t-studio">
+    <section class="studio">
+      <p><a href="#/home">&larr; Your classes</a></p>
+      <div class="practice-head"><h1 id="st-title"></h1><span id="st-status" class="chip"></span></div>
+      <p id="st-settings" class="hint"></p>
+      <div id="st-body"></div>
+    </section>
+  </template>
+
+  <template id="t-studio-lesson">
+    <div class="player">
+      <button id="st-play" class="secondary" aria-pressed="false">Play your recording</button>
+      <audio id="st-audio" preload="auto"></audio>
+      <span id="st-now" class="hint" aria-live="off"></span>
+    </div>
+    <canvas id="roll" aria-label="Your notes over time; sections are shaded"></canvas>
+    <h2>Notes</h2>
+    <p class="hint" id="st-notes-hint"></p>
+    <div id="st-notes" class="note-list" role="listbox" aria-label="Detected notes"></div>
+    <div id="st-note-edit" class="card" hidden>
+      <p id="st-note-info"></p>
+      <p id="st-split-hint" class="hint" hidden></p>
+      <button id="st-up" class="secondary">Semitone up</button>
+      <button id="st-down" class="secondary">Semitone down</button>
+      <button id="st-split" class="secondary">Split into two notes</button>
+      <button id="st-delete" class="secondary danger">Delete this note</button>
+    </div>
+    <h2>Sections</h2>
+    <form id="st-sections" class="inline-form">
+      <label for="st-ranges">Note ranges, in order</label>
+      <input id="st-ranges" name="ranges" aria-describedby="st-ranges-hint">
+      <p id="st-ranges-hint" class="hint">For example 1-7, 8-14. Students practise and are marked section by section.</p>
+      <button type="submit" class="secondary">Save sections</button>
+    </form>
+    <div id="st-publish-box" class="card">
+      <p>When the notes and sections are right, publish the lesson. Students can then see it, and the notes are locked so everyone is marked against the same lesson.</p>
+      <button id="st-publish" class="primary">Publish to students</button>
+    </div>
+    <p><a id="st-preview" href="#">Preview as a student</a></p>
+    <section id="st-dash" hidden>
+      <h2>How the class is doing</h2>
+      <div id="st-heat"></div>
+      <h3>Hardest notes</h3>
+      <ol id="st-hard" class="hard"></ol>
+      <h3>Students</h3>
+      <div class="table-wrap"><table id="st-progress">
+        <thead><tr><th scope="col">Student</th><th scope="col">Full takes</th><th scope="col">Best</th>
+          <th scope="col">Sections passed</th><th scope="col">Scores over time</th><th scope="col"><span class="visually-hidden">Takes</span></th></tr></thead>
+        <tbody></tbody></table></div>
+    </section>
+  </template>
+
+  <template id="t-takes">
+    <section>
+      <p><a id="tk-back" href="#">&larr; Back to the lesson</a></p>
+      <h1 id="tk-title"></h1>
+      <ol id="tk-list" class="takes"></ol>
+      <section id="tk-detail" class="report" hidden aria-labelledby="tk-detail-title">
+        <h2 id="tk-detail-title"></h2>
+        <audio id="tk-audio" controls preload="metadata"></audio>
+        <div id="tk-report"></div>
+        <form id="tk-comment" class="card">
+          <label for="tk-body">Comment for the student</label>
+          <textarea id="tk-body" name="body" rows="3" required></textarea>
+          <label for="tk-override">Your score (optional, replaces the automatic one)</label>
+          <input id="tk-override" name="score_override" type="number" min="0" max="100">
+          <button type="submit" class="primary">Send comment</button>
+        </form>
+      </section>
+    </section>
+  </template>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
